@@ -1,6 +1,6 @@
 # 作者：Xiaoqiang
 # 微信公众号：XiaoqiangClub
-# 创建时间：2024-01-20 12:00:00 UTC
+# 创建时间：2025-11-18 12:00:00 UTC
 # 文件描述：告警通知管理器，管理多个通知渠道
 # 文件路径：xqclog/alerts/manager.py
 

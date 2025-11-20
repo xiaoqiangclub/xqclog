@@ -1,6 +1,6 @@
 # 作者：Xiaoqiang
 # 微信公众号：XiaoqiangClub
-# 创建时间：2024-01-20 14:00:00 UTC
+# 创建时间：2025-11-18 14:00:00 UTC
 # 文件描述：生产环境完整配置示例
 # 文件路径：examples/production_example.py
 
@@ -142,7 +142,7 @@ def simulate_production_scenarios():
     logger.info(
         "订单系统已恢复正常",
         alert=True,  # 👈 重要通知，发送给所有人
-        recovery_time="2024-01-20 10:15:00",
+        recovery_time="2025-11-18 10:15:00",
         total_downtime_minutes=10
     )
     print("  → 记录INFO日志，alert=True发送恢复通知给所有渠道\n")

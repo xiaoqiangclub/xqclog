@@ -1,6 +1,6 @@
 # 作者：Xiaoqiang
 # 微信公众号：XiaoqiangClub
-# 创建时间：2024-01-20 08:00:00 UTC
+# 创建时间：2025-11-18 08:00:00 UTC
 # 文件描述：日志核心类，基于loguru实现的日志管理器
 # 文件路径：xqclog/logger.py
 

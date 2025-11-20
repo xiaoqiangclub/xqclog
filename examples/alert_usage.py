@@ -1,6 +1,6 @@
 # 作者：Xiaoqiang
 # 微信公众号：XiaoqiangClub
-# 创建时间：2024-01-20 14:00:00 UTC
+# 创建时间：2025-11-18 14:00:00 UTC
 # 文件描述：xqclog模块的告警功能使用示例，展示alert参数和alert_levels的用法
 # 文件路径：examples/alert_usage.py
 

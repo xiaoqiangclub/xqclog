@@ -1,6 +1,6 @@
 # 作者：Xiaoqiang
 # 微信公众号：XiaoqiangClub
-# 创建时间：2024-01-20 10:00:00 UTC
+# 创建时间：2025-11-18 10:00:00 UTC
 # 文件描述：xqclog模块的高级使用示例
 # 文件路径：examples/advanced_usage.py
 

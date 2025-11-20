@@ -1,6 +1,6 @@
 # 作者：Xiaoqiang
 # 微信公众号：XiaoqiangClub
-# 创建时间：2024-01-20 12:00:00 UTC
+# 创建时间：2025-11-18 12:00:00 UTC
 # 文件描述：企业微信应用消息告警通知器
 # 文件路径：xqclog/alerts/weixin_app.py
 
