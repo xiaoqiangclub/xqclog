@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "xqclog"
 version = "0.0.1"
-description = "⚡ 基于 Loguru 的自用 Python 日志模块 - 开箱即用"
+description = "⚡ 基于 Loguru 的 Python 日志模块 - 开箱即用，支持多种告警通知"
 authors = ["Xiaoqiang <xiaoqiang@xiaoqiangclub.com>"]
 readme = "README.md"
 license = "MIT"
 homepage = "https://github.com/xiaoqiangclub/xqclog"
 repository = "https://github.com/xiaoqiangclub/xqclog"
-keywords = ["logging", "loguru", "xqc"]
+keywords = ["logging", "loguru", "alert", "notification"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -17,18 +17,21 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
+
+packages = [{ include = "xqclog" }]
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
 loguru = "^0.7.0"
-pyyaml = "^6.0"
+pyyaml = "^6.0.1"
 requests = "^2.31.0"
 
-[tool.poetry.dev-dependencies]
-pytest = "^7.0"
-black = "^23.0"
-flake8 = "^6.0"
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+black = "^23.12.0"
+flake8 = "^7.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
