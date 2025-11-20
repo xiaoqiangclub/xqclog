@@ -7,7 +7,7 @@
 import sys
 import time
 from pathlib import Path
-from typing import Optional, Union, Any, Dict
+from typing import Optional, Union, Any, Literal
 from contextlib import contextmanager
 from loguru import logger as loguru_logger
 
@@ -738,7 +738,7 @@ def get_logger() -> XQCLogger:
 
 def init_logger(
         config: Optional[LogConfig] = None,
-        preset: Optional[str] = None,
+        preset: Optional[Literal["auto", "development", "testing", "production", "web", "crawler", "data"]] = None,
         config_file: Optional[Union[str, Path]] = None,
         **kwargs: Any
 ) -> XQCLogger:

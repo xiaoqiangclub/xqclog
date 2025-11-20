@@ -11,7 +11,7 @@ from . import decorators
 
 __version__ = "0.0.1"
 __author__ = "Xiaoqiang"
-__description__ = "基于Loguru的简易日志模块 - XiaoqiangClub"
+__description__ = "⚡ 基于 Loguru 的自用 Python 日志模块 - 开箱即用"
 
 __all__ = [
     "XQCLogger",
