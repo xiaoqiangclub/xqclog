@@ -1,0 +1,44 @@
+# 告警配置示例
+# 展示各种告警配置方式
+
+logging:
+  log_level: INFO
+  log_dir: logs
+  log_file: app.log
+
+  alert_strategy: parallel   # 并行发送到所有通知器
+
+  notifiers:
+    # 钉钉 - 常规错误
+    - type: dingtalk
+      webhook: "https://oapi.dingtalk.com/robot/send?access_token=TOKEN1"
+      alert_levels:
+        - ERROR              # 只有ERROR和CRITICAL会发送
+        - CRITICAL
+      priority: 100
+
+    # 企业微信 - 只通知严重错误
+    - type: weixin_webhook
+      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=KEY1"
+      alert_levels:
+        - CRITICAL           # 只有CRITICAL会发送
+      priority: 90
+
+    # 邮件 - 手动触发
+    - type: email
+      smtp_host: "smtp.qq.com"
+      smtp_port: 465
+      smtp_user: "alert@qq.com"
+      smtp_password: "YOUR_PASSWORD"
+      use_ssl: true
+      to_addrs:
+        - "admin@example.com"
+      alert_levels: null     # 👈 null表示默认不发送
+      priority: 80           #    只在代码中使用alert=True时发送
+
+    # 示例：WARNING级别的监控（不建议生产环境使用）
+    # - type: weixin_webhook
+    #   webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=KEY2"
+    #   alert_levels:
+    #     - WARNING          # 会产生大量告警，谨慎使用
+    #   priority: 70

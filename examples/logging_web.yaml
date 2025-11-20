@@ -1,0 +1,18 @@
+# Web应用配置示例
+# 特点：启用日志分割、HTTP请求日志
+
+logging:
+  log_level: INFO
+  log_dir: logs/web
+  log_file: app.log
+  rotation: 200 MB
+  retention: 30 days
+
+  auto_split: true           # 👈 启用日志分割
+
+  notifiers:
+    - type: dingtalk
+      webhook: "https://oapi.dingtalk.com/robot/send?access_token=YOUR_TOKEN"
+      alert_levels:
+        - ERROR
+        - CRITICAL

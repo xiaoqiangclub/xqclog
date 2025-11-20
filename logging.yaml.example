@@ -1,0 +1,81 @@
+# XQCLog 配置文件模板
+# 使用方法：复制此文件为 logging.yaml 并修改配置
+# cp logging.yaml.example logging.yaml
+
+logging:
+  # ========== 基础配置 ==========
+  log_level: INFO                    # 日志级别：TRACE/DEBUG/INFO/SUCCESS/WARNING/ERROR/CRITICAL
+  log_dir: logs                      # 日志目录
+  log_file: app.log                  # 日志文件名
+
+  # ========== 日志轮转 ==========
+  rotation: 100 MB                   # 轮转条件：100 MB / 1 GB / 1 day / 1 week / 00:00
+  retention: 30 days                 # 保留时间：30 days / 1 week / 2 months
+  compression: zip                   # 压缩格式：zip / gz / bz2 / xz
+
+  # ========== 输出控制 ==========
+  console_output: true               # 是否输出到控制台
+  file_output: true                  # 是否输出到文件
+  auto_split: false                  # 是否按级别自动分割
+
+  # ========== 性能优化 ==========
+  enqueue: true                      # 异步写入
+
+  # ========== 调试信息 ==========
+  backtrace: true                    # 显示详细堆栈
+  diagnose: true                     # 显示变量诊断（生产环境建议关闭）
+
+  # ========== 告警配置 ==========
+  alert_strategy: parallel           # 发送策略：parallel / sequential / failover / priority
+  alert_retry: 3                     # 重试次数
+  alert_retry_delay: 1.5             # 重试延迟（秒）
+  alert_timeout: 10.0                # 发送超时（秒）
+
+  # ========== 通知器配置 ==========
+  # 注意：以下配置需要替换为真实的参数
+  notifiers:
+    # 钉钉机器人
+    - type: dingtalk
+      webhook: "https://oapi.dingtalk.com/robot/send?access_token=YOUR_TOKEN"  # 替换为真实token
+      secret: "YOUR_SECRET"                                                     # 替换为真实secret
+      at_mobiles:
+        - "13800138000"              # 替换为真实手机号
+      alert_levels:
+        - ERROR
+        - CRITICAL
+      priority: 100
+      enabled: true                  # 是否启用
+
+    # 企业微信群机器人
+    # - type: weixin_webhook
+    #   webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_KEY"
+    #   mentioned_mobile_list:
+    #     - "13800138000"
+    #   alert_levels:
+    #     - ERROR
+    #     - CRITICAL
+    #   priority: 90
+
+    # 企业微信应用
+    # - type: weixin_app
+    #   corpid: "ww1234567890abcdef"           # 替换为企业ID
+    #   corpsecret: "YOUR_SECRET"              # 替换为应用Secret
+    #   agentid: 1000002                       # 替换为应用AgentId
+    #   touser: "@all"
+    #   alert_levels:
+    #     - CRITICAL
+    #   priority: 85
+
+    # 邮件通知
+    # - type: email
+    #   smtp_host: "smtp.qq.com"               # SMTP服务器
+    #   smtp_port: 465                         # SMTP端口
+    #   smtp_user: "your@qq.com"               # 替换为真实邮箱
+    #   smtp_password: "YOUR_PASSWORD"         # 替换为授权码
+    #   use_ssl: true
+    #   from_name: "XQCLog告警系统"
+    #   to_addrs:
+    #     - "admin@example.com"                # 替换为收件人
+    #   subject_prefix: "[生产告警]"
+    #   alert_levels: null                     # null表示默认不发送，只在alert=True时发送
+    #   priority: 80

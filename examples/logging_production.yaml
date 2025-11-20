@@ -1,0 +1,63 @@
+# 生产环境配置示例
+# 特点：
+# 1. 关闭控制台输出
+# 2. 启用日志分割
+# 3. 配置多级告警
+# 4. 邮件默认不发送（alert_levels=null）
+
+logging:
+  log_level: INFO
+  log_dir: /var/log/myapp
+  log_file: app.log
+  rotation: 500 MB
+  retention: 90 days
+  compression: gz
+
+  console_output: false      # 生产环境关闭控制台
+  file_output: true
+  auto_split: true           # 启用日志分割
+
+  enqueue: true
+  backtrace: true
+  diagnose: false            # 生产环境关闭诊断
+
+  alert_strategy: priority   # 使用优先级策略
+  alert_retry: 3
+  alert_retry_delay: 2.0
+
+  notifiers:
+    # 第1级：邮件给高管（默认不发送）
+    - type: email
+      smtp_host: "smtp.company.com"
+      smtp_port: 465
+      smtp_user: "alert@company.com"
+      smtp_password: "YOUR_PASSWORD"
+      use_ssl: true
+      to_addrs:
+        - "ceo@company.com"
+        - "cto@company.com"
+      subject_prefix: "[🚨紧急生产告警]"
+      alert_levels: null       # 👈 默认不发送，只在alert=True时发送
+      priority: 100
+
+    # 第2级：企业微信给开发团队
+    - type: weixin_app
+      corpid: "wwxxx"
+      corpsecret: "YOUR_SECRET"
+      agentid: 1000002
+      touser: "DevTeam"
+      alert_levels:
+        - ERROR
+        - CRITICAL
+      priority: 90
+
+    # 第3级：钉钉给所有相关人员
+    - type: dingtalk
+      webhook: "https://oapi.dingtalk.com/robot/send?access_token=YOUR_TOKEN"
+      secret: "YOUR_SECRET"
+      at_mobiles:
+        - "13800138000"
+      alert_levels:
+        - ERROR
+        - CRITICAL
+      priority: 80

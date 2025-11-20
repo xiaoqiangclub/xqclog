@@ -1,0 +1,14 @@
+# 基础配置示例
+# 适用于：开发环境、简单项目
+
+logging:
+  log_level: DEBUG
+  log_dir: logs
+  log_file: app.log
+  rotation: 50 MB
+  retention: 7 days
+  console_output: true
+  file_output: true
+
+  # 不配置通知器
+  notifiers: []
