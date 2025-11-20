@@ -1,6 +1,6 @@
 # 作者：Xiaoqiang
 # 微信公众号：XiaoqiangClub
-# 创建时间：2025-11-18 12:00:00 UTC
+# 创建时间：2024-01-20 12:00:00 UTC
 # 文件描述：钉钉机器人告警通知器
 # 文件路径：xqclog/alerts/dingtalk.py
 
@@ -71,8 +71,7 @@ class DingTalkNotifier(BaseNotifier):
         :param alert_msg: 告警消息对象
         :return: 是否发送成功
         """
-        if not self.should_send(alert_msg.level):
-            return False
+        # ✅ 删除这里的 should_send 检查，因为在 manager 中已经统一检查了
 
         try:
             # 根据级别设置emoji
@@ -104,6 +103,9 @@ class DingTalkNotifier(BaseNotifier):
             if alert_msg.extra:
                 content += "**额外信息**:\n"
                 for key, value in alert_msg.extra.items():
+                    # 跳过内部使用的 _alert 字段
+                    if key.startswith('_'):
+                        continue
                     content += f"- {key}: {value}\n"
 
             # 构造请求数据
@@ -135,14 +137,17 @@ class DingTalkNotifier(BaseNotifier):
             if response.status_code == 200:
                 result = response.json()
                 if result.get("errcode") == 0:
+                    print(f"✅ 钉钉通知发送成功: {alert_msg.level} - {alert_msg.message[:50]}")
                     return True
                 else:
-                    print(f"钉钉通知发送失败: {result.get('errmsg')}")
+                    print(f"❌ 钉钉通知发送失败: {result.get('errmsg')}")
                     return False
             else:
-                print(f"钉钉通知发送失败: HTTP {response.status_code}")
+                print(f"❌ 钉钉通知发送失败: HTTP {response.status_code}")
                 return False
 
         except Exception as e:
-            print(f"钉钉通知发送异常: {e}")
+            print(f"❌ 钉钉通知发送异常: {e}")
+            import traceback
+            traceback.print_exc()
             return False

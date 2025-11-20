@@ -1,6 +1,6 @@
 # 作者：Xiaoqiang
 # 微信公众号：XiaoqiangClub
-# 创建时间：2025-11-18 14:00:00 UTC
+# 创建时间：2024-01-20 14:00:00 UTC
 # 文件描述：邮件告警通知器
 # 文件路径：xqclog/alerts/email.py
 
@@ -134,6 +134,9 @@ class EmailNotifier(BaseNotifier):
         if alert_msg.extra:
             lines.append("额外信息:")
             for key, value in alert_msg.extra.items():
+                # 跳过内部使用的字段（以下划线开头）
+                if key.startswith('_'):
+                    continue
                 lines.append(f"  {key}: {value}")
             lines.append("")
 
@@ -241,6 +244,9 @@ class EmailNotifier(BaseNotifier):
         if alert_msg.extra:
             html += '<div class="section"><strong>额外信息:</strong><br>'
             for key, value in alert_msg.extra.items():
+                # 跳过内部使用的字段
+                if key.startswith('_'):
+                    continue
                 html += f'<div class="info-item">{key}: {value}</div>'
             html += '</div>'
 
@@ -262,10 +268,12 @@ class EmailNotifier(BaseNotifier):
         :param alert_msg: 告警消息对象
         :return: 是否发送成功
         """
-        if not self.should_send(alert_msg.level):
-            return False
+        # ✅ 删除 should_send 检查（在 manager 中统一检查）
 
         try:
+            print(f"📧 开始发送邮件: {alert_msg.level} - {alert_msg.message[:50]}")
+            print(f"   收件人: {', '.join(self.to_addrs)}")
+
             # 创建邮件消息
             message = self._create_message(alert_msg)
 
@@ -274,26 +282,51 @@ class EmailNotifier(BaseNotifier):
 
             # 连接SMTP服务器并发送
             if self.use_ssl:
+                print(f"   使用SSL连接: {self.smtp_host}:{self.smtp_port}")
                 with smtplib.SMTP_SSL(
                         self.smtp_host,
                         self.smtp_port,
                         timeout=self.timeout
                 ) as smtp:
+                    print(f"   登录用户: {self.smtp_user}")
                     smtp.login(self.smtp_user, self.smtp_password)
                     smtp.send_message(message, self.from_addr, all_recipients)
             else:
+                print(f"   使用普通连接: {self.smtp_host}:{self.smtp_port}")
                 with smtplib.SMTP(
                         self.smtp_host,
                         self.smtp_port,
                         timeout=self.timeout
                 ) as smtp:
                     if self.use_tls:
+                        print(f"   启动TLS加密")
                         smtp.starttls()
+                    print(f"   登录用户: {self.smtp_user}")
                     smtp.login(self.smtp_user, self.smtp_password)
                     smtp.send_message(message, self.from_addr, all_recipients)
 
+            print(f"✅ 邮件告警发送成功: {alert_msg.level} - {alert_msg.message[:50]}")
             return True
 
+        except smtplib.SMTPAuthenticationError as e:
+            print(f"❌ 邮件认证失败: {e}")
+            print(f"   提示: 请检查SMTP用户名和密码是否正确（QQ/163邮箱需要使用授权码）")
+            import traceback
+            traceback.print_exc()
+            return False
+        except smtplib.SMTPConnectError as e:
+            print(f"❌ 无法连接到SMTP服务器: {e}")
+            print(f"   提示: 请检查smtp_host和smtp_port是否正确")
+            import traceback
+            traceback.print_exc()
+            return False
+        except smtplib.SMTPException as e:
+            print(f"❌ SMTP错误: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
         except Exception as e:
-            print(f"邮件告警发送失败: {e}")
+            print(f"❌ 邮件告警发送异常: {e}")
+            import traceback
+            traceback.print_exc()
             return False
