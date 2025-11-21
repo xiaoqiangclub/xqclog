@@ -55,7 +55,19 @@ class XQCLogger:
         :param preset: 预设配置名称（auto/development/testing/production/web/crawler/data）
         :param config_file: 配置文件路径（支持 .yaml, .yml, .json）
         :param kwargs: 直接传入的配置参数，会覆盖config中的对应参数
+                      支持 logging_format 参数以兼容标准库 logging
         :return: 返回self以支持链式调用
+
+        示例：
+            # 使用 loguru 格式（推荐）
+            logger = init_logger(
+                format_string="{time} | {level} | {name}:{function}:{line} | {message}"
+            )
+
+            # 使用 logging 格式（兼容标准库）
+            logger = init_logger(
+                logging_format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            )
         """
         # 优先级：kwargs > config > config_file > preset > 默认配置
 
@@ -72,10 +84,15 @@ class XQCLogger:
         elif config is None:
             config = LogConfig()
 
-        # 4. kwargs参数覆盖config
+        # 4. kwargs参数覆盖config（包括 logging_format）
         for key, value in kwargs.items():
             if hasattr(config, key):
                 setattr(config, key, value)
+
+        # 5. 如果 kwargs 中有 logging_format，触发格式转换
+        if 'logging_format' in kwargs and kwargs['logging_format']:
+            from .config import convert_logging_format
+            config.format_string = convert_logging_format(kwargs['logging_format'])
 
         self.config = config
 
@@ -258,7 +275,7 @@ class XQCLogger:
         """
         if alert is not None:
             kwargs['_alert'] = alert
-        self.logger.trace(message, *args, **kwargs)
+        self.logger.opt(depth=1).trace(message, *args, **kwargs)
 
     def debug(self, message: str, *args: Any, alert: Optional[bool] = None, **kwargs: Any) -> None:
         """
@@ -271,7 +288,7 @@ class XQCLogger:
         """
         if alert is not None:
             kwargs['_alert'] = alert
-        self.logger.debug(message, *args, **kwargs)
+        self.logger.opt(depth=1).debug(message, *args, **kwargs)
 
     def info(self, message: str, *args: Any, alert: Optional[bool] = None, **kwargs: Any) -> None:
         """
@@ -284,7 +301,7 @@ class XQCLogger:
         """
         if alert is not None:
             kwargs['_alert'] = alert
-        self.logger.info(message, *args, **kwargs)
+        self.logger.opt(depth=1).info(message, *args, **kwargs)
 
     def success(self, message: str, *args: Any, alert: Optional[bool] = None, **kwargs: Any) -> None:
         """
@@ -297,7 +314,7 @@ class XQCLogger:
         """
         if alert is not None:
             kwargs['_alert'] = alert
-        self.logger.success(message, *args, **kwargs)
+        self.logger.opt(depth=1).success(message, *args, **kwargs)
 
     def warning(self, message: str, *args: Any, alert: Optional[bool] = None, **kwargs: Any) -> None:
         """
@@ -310,7 +327,7 @@ class XQCLogger:
         """
         if alert is not None:
             kwargs['_alert'] = alert
-        self.logger.warning(message, *args, **kwargs)
+        self.logger.opt(depth=1).warning(message, *args, **kwargs)
 
     def error(self, message: str, *args: Any, alert: Optional[bool] = None, **kwargs: Any) -> None:
         """
@@ -323,7 +340,7 @@ class XQCLogger:
         """
         if alert is not None:
             kwargs['_alert'] = alert
-        self.logger.error(message, *args, **kwargs)
+        self.logger.opt(depth=1).error(message, *args, **kwargs)
 
     def critical(self, message: str, *args: Any, alert: Optional[bool] = None, **kwargs: Any) -> None:
         """
@@ -336,7 +353,7 @@ class XQCLogger:
         """
         if alert is not None:
             kwargs['_alert'] = alert
-        self.logger.critical(message, *args, **kwargs)
+        self.logger.opt(depth=1).critical(message, *args, **kwargs)
 
     def exception(self, message: str, *args: Any, alert: Optional[bool] = None, **kwargs: Any) -> None:
         """
@@ -349,7 +366,7 @@ class XQCLogger:
         """
         if alert is not None:
             kwargs['_alert'] = alert
-        self.logger.exception(message, *args, **kwargs)
+        self.logger.opt(depth=1).exception(message, *args, **kwargs)
 
     def log(self, level: str, message: str, *args: Any, alert: Optional[bool] = None, **kwargs: Any) -> None:
         """
@@ -363,7 +380,7 @@ class XQCLogger:
         """
         if alert is not None:
             kwargs['_alert'] = alert
-        self.logger.log(level, message, *args, **kwargs)
+        self.logger.opt(depth=1).log(level, message, *args, **kwargs)
 
     def set_level(self, level: str) -> None:
         """
@@ -389,13 +406,13 @@ class XQCLogger:
         :param level: 日志级别
         """
         start_time = time.time()
-        self.log(level, f"⏱️  开始: {name}")
+        self.logger.opt(depth=1).log(level, f"⏱️  开始: {name}")
 
         try:
             yield
         finally:
             elapsed = time.time() - start_time
-            self.log(level, f"⏱️  完成: {name}，耗时: {elapsed:.4f}秒")
+            self.logger.opt(depth=1).log(level, f"⏱️  完成: {name}，耗时: {elapsed:.4f}秒")
 
     def log_request(
             self,
@@ -435,9 +452,9 @@ class XQCLogger:
 
         # 添加额外信息到日志上下文
         if extra:
-            self.logger.bind(**extra).log(level, message)
+            self.logger.opt(depth=1).bind(**extra).log(level, message)
         else:
-            self.log(level, message)
+            self.logger.opt(depth=1).log(level, message)
 
     def log_db_query(
             self,
@@ -459,10 +476,10 @@ class XQCLogger:
         rows_info = f"- {rows} rows" if rows is not None else ""
 
         # 根据耗时确定日志级别
-        if duration > 5.0:
-            level = "WARNING"
-        elif duration > 10.0:
+        if duration > 10.0:
             level = "ERROR"
+        elif duration > 5.0:
+            level = "WARNING"
         else:
             level = "DEBUG"
 
@@ -473,9 +490,9 @@ class XQCLogger:
             extra['_alert'] = alert
 
         if extra:
-            self.logger.bind(**extra).log(level, message)
+            self.logger.opt(depth=1).bind(**extra).log(level, message)
         else:
-            self.log(level, message)
+            self.logger.opt(depth=1).log(level, message)
 
     def log_api_call(
             self,
@@ -504,9 +521,9 @@ class XQCLogger:
             extra['_alert'] = alert
 
         if extra:
-            self.logger.bind(**extra).log(level, message)
+            self.logger.opt(depth=1).bind(**extra).log(level, message)
         else:
-            self.log(level, message)
+            self.logger.opt(depth=1).log(level, message)
 
     def log_performance(
             self,
@@ -532,9 +549,9 @@ class XQCLogger:
             extra['_alert'] = alert
 
         if extra:
-            self.logger.bind(**extra).info(message)
+            self.logger.opt(depth=1).bind(**extra).info(message)
         else:
-            self.info(message)
+            self.logger.opt(depth=1).info(message)
 
     def log_business(
             self,
@@ -558,9 +575,9 @@ class XQCLogger:
             extra['_alert'] = alert
 
         if extra:
-            self.logger.bind(**extra).log(level, message)
+            self.logger.opt(depth=1).bind(**extra).log(level, message)
         else:
-            self.log(level, message)
+            self.logger.opt(depth=1).log(level, message)
 
     def add_handler(
             self,
@@ -748,7 +765,22 @@ def init_logger(
     :param config: 日志配置对象
     :param preset: 预设配置名称
     :param config_file: 配置文件路径
-    :param kwargs: 配置参数
+    :param kwargs: 配置参数，支持：
+                  - format_string: loguru 格式字符串（推荐）
+                  - logging_format: logging 格式字符串（兼容标准库）
+                  - log_level: 日志级别
+                  - 其他 LogConfig 支持的参数
     :return: XQCLogger实例
+
+    示例：
+        # 使用 loguru 格式
+        logger = init_logger(
+            format_string="{time} | {level} | {name}:{function} | {message}"
+        )
+
+        # 使用 logging 格式（自动转换）
+        logger = init_logger(
+            logging_format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
     """
     return _global_logger.init(config=config, preset=preset, config_file=config_file, **kwargs)

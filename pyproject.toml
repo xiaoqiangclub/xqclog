@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "xqclog"
-version = "0.0.1"
+version = "0.0.2"
 description = "⚡ 基于 Loguru 的 Python 日志模块 - 开箱即用，支持多种告警通知"
 authors = ["Xiaoqiang <xiaoqiang@xiaoqiangclub.com>"]
 readme = "README.md"

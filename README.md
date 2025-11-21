@@ -2,7 +2,7 @@
 
 ![XQCLog](https://s2.loli.net/2025/11/20/4WYkx7HXB5JO6Mv.jpg)
 
-[![PyPI Version](https://img.shields.io/badge/PyPI-0.0.1-blue)](https://pypi.org/project/xqclog/) 
+[![PyPI Version](https://img.shields.io/badge/PyPI-0.0.2-blue)](https://pypi.org/project/xqclog/) 
 [![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/) 
 [![License](https://img.shields.io/badge/License-MIT-green)](https://github.com/xiaoqiangclub/xqclog/blob/main/LICENSE) 
 [![Loguru](https://img.shields.io/badge/Based%20on-Loguru-orange)](https://github.com/Delgan/loguru)
@@ -1551,6 +1551,30 @@ init_logger(
 ---
 
 ## 📝 更新日志
+### v0.0.2 (2025-11-21)
+
+**🐛 Bug 修复**
+- **修复日志调用者名称显示问题**
+  - 所有日志方法添加 `opt(depth=1)` 参数，确保正确识别真实的调用者
+  - 修复前：所有日志显示为 `xqclog.logger`
+  - 修复后：正确显示调用者的模块名、函数名和行号
+
+**✨ 新功能**
+- **支持标准库 logging 格式**
+  - 新增 `logging_format` 参数，兼容标准库 `logging` 的格式字符串
+  - 自动将 logging 格式转换为 loguru 格式
+  - 便于从标准库 logging 迁移
+
+```python
+# 使用 logging 格式初始化
+from xqclog import init_logger
+
+logger = init_logger(
+    logging_format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+```
+
+---
 
 ### v0.0.1 (2025-11-18)
 

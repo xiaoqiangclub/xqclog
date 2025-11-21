@@ -10,6 +10,66 @@ import yaml
 import json
 
 
+def convert_logging_format(logging_format: str) -> str:
+    """
+    将标准库 logging 格式转换为 loguru 格式
+
+    支持的 logging 格式占位符：
+    - %(asctime)s       -> {time:YYYY-MM-DD HH:mm:ss}
+    - %(levelname)s     -> {level}
+    - %(name)s          -> {name}
+    - %(funcName)s      -> {function}
+    - %(lineno)d        -> {line}
+    - %(lineno)s        -> {line}
+    - %(message)s       -> {message}
+    - %(filename)s      -> {file}
+    - %(pathname)s      -> {file.path}
+    - %(module)s        -> {module}
+    - %(process)d       -> {process}
+    - %(process)s       -> {process}
+    - %(thread)d        -> {thread}
+    - %(thread)s        -> {thread}
+    - %(threadName)s    -> {thread.name}
+    - %(levelno)d       -> {level.no}
+    - %(levelno)s       -> {level.no}
+
+    :param logging_format: logging 格式字符串
+    :return: loguru 格式字符串
+
+    示例：
+        >>> convert_logging_format('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        '{time:YYYY-MM-DD HH:mm:ss} - {name} - {level} - {message}'
+    """
+    # 定义映射关系
+    mapping = {
+        '%(asctime)s': '{time:YYYY-MM-DD HH:mm:ss}',
+        '%(levelname)s': '{level}',
+        '%(name)s': '{name}',
+        '%(funcName)s': '{function}',
+        '%(lineno)d': '{line}',
+        '%(lineno)s': '{line}',
+        '%(message)s': '{message}',
+        '%(filename)s': '{file}',
+        '%(pathname)s': '{file.path}',
+        '%(module)s': '{module}',
+        '%(process)d': '{process}',
+        '%(process)s': '{process}',
+        '%(thread)d': '{thread}',
+        '%(thread)s': '{thread}',
+        '%(threadName)s': '{thread.name}',
+        '%(levelno)d': '{level.no}',
+        '%(levelno)s': '{level.no}',
+    }
+
+    result = logging_format
+    # 按照长度从长到短排序，避免部分替换问题
+    # 例如：先替换 %(lineno)d 再替换 %(lineno)s
+    for old, new in sorted(mapping.items(), key=lambda x: len(x[0]), reverse=True):
+        result = result.replace(old, new)
+
+    return result
+
+
 class LogConfig:
     """日志配置类"""
 
@@ -27,6 +87,7 @@ class LogConfig:
             diagnose: bool = True,
             colorize: bool = True,
             format_string: Optional[str] = None,
+            logging_format: Optional[str] = None,  # 新增：支持 logging 格式
             console_output: bool = True,
             file_output: bool = True,
             auto_split: bool = False,
@@ -54,7 +115,8 @@ class LogConfig:
         :param backtrace: 是否显示详细的异常堆栈信息
         :param diagnose: 是否显示变量值诊断信息
         :param colorize: 控制台输出是否启用彩色
-        :param format_string: 自定义日志格式字符串
+        :param format_string: 自定义日志格式字符串（loguru 格式，推荐）
+        :param logging_format: 标准库 logging 格式字符串（兼容模式，会自动转换为 loguru 格式）
         :param console_output: 是否输出到控制台
         :param file_output: 是否输出到文件
         :param auto_split: 是否按日志级别自动分割文件
@@ -66,6 +128,17 @@ class LogConfig:
         :param alert_timeout: 单个通知器发送超时时间（秒）
         :param alert_webhook: 旧版告警webhook地址（向后兼容）
         :param alert_levels: 旧版触发告警的日志级别列表（向后兼容）
+
+        示例：
+            # 使用 loguru 格式（推荐）
+            config = LogConfig(
+                format_string="{time} | {level} | {name}:{function}:{line} | {message}"
+            )
+
+            # 使用 logging 格式（兼容标准库）
+            config = LogConfig(
+                logging_format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            )
         """
         self.log_level = log_level.upper()
         self.log_dir = log_dir
@@ -108,16 +181,24 @@ class LogConfig:
                 "enabled": True,
             }]
 
-        # 默认日志格式
-        if format_string is None:
+        # 保存原始的 logging_format（用于导出配置）
+        self.logging_format = logging_format
+
+        # 处理日志格式：优先级 format_string > logging_format > 默认格式
+        if format_string is not None:
+            # 用户提供了 loguru 格式，直接使用
+            self.format_string = format_string
+        elif logging_format is not None:
+            # 用户提供了 logging 格式，转换为 loguru 格式
+            self.format_string = convert_logging_format(logging_format)
+        else:
+            # 使用默认的 loguru 格式
             self.format_string = (
                 "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
                 "<level>{level: <8}</level> | "
                 "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
                 "<level>{message}</level>"
             )
-        else:
-            self.format_string = format_string
 
     @property
     def log_path(self) -> Path:
@@ -153,7 +234,7 @@ class LogConfig:
 
         :return: 配置字典
         """
-        return {
+        config_dict = {
             "log_level": self.log_level,
             "log_dir": self.log_dir,
             "log_file": self.log_file,
@@ -175,6 +256,12 @@ class LogConfig:
             "alert_retry_delay": self.alert_retry_delay,
             "alert_timeout": self.alert_timeout,
         }
+
+        # 如果设置了 logging_format，也包含到字典中
+        if self.logging_format is not None:
+            config_dict["logging_format"] = self.logging_format
+
+        return config_dict
 
     @classmethod
     def from_file(cls, config_file: Union[str, Path]) -> 'LogConfig':

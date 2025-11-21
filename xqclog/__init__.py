@@ -9,7 +9,7 @@ from .config import LogConfig
 from .presets import Presets
 from . import decorators
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __author__ = "Xiaoqiang"
 __description__ = "⚡ 基于 Loguru 的自用 Python 日志模块 - 开箱即用"
 
