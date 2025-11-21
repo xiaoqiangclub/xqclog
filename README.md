@@ -2,7 +2,7 @@
 
 ![XQCLog](https://s2.loli.net/2025/11/20/4WYkx7HXB5JO6Mv.jpg)
 
-[![PyPI Version](https://img.shields.io/badge/PyPI-0.0.2-blue)](https://pypi.org/project/xqclog/) 
+[![PyPI Version](https://img.shields.io/badge/PyPI-0.0.3-blue)](https://pypi.org/project/xqclog/) 
 [![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/) 
 [![License](https://img.shields.io/badge/License-MIT-green)](https://github.com/xiaoqiangclub/xqclog/blob/main/LICENSE) 
 [![Loguru](https://img.shields.io/badge/Based%20on-Loguru-orange)](https://github.com/Delgan/loguru)
