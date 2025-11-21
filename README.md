@@ -537,6 +537,8 @@ init_logger(
 
 ### 告警通知
 
+![告警通知效果展示](images/xqclog_alert.jpg)
+
 #### 告警触发机制
 
 XQCLog 提供三层告警控制机制：
