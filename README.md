@@ -154,7 +154,7 @@ poetry install
 ### 1️⃣ 最简单的使用（10 秒上手）
 
 ```python
-from xqclog import logger, init_logger
+from xqclog import logger
 
 # 默认 DEBUG 级别，彩色输出
 logger.info("Hello, XQCLog!")
@@ -1549,24 +1549,23 @@ init_logger(
 
 ## 📝 更新日志
 
-## 🆕 最新更新 v0.0.3
+## v0.0.3
 
-**✨ 开箱即用**
-- 🚀 现在无需手动初始化，直接导入即可使用！
+**🚀 开箱即用**
+- 现在无需手动初始化，直接导入即可使用！
 ```python
 from xqclog import logger
 
-logger.debug("调试信息")
-logger.info("普通信息")
-logger.warning("警告信息")
-logger.error("错误信息")
-# 就这么简单！无需配置，默认 DEBUG 级别，彩色输出
+# 默认 DEBUG 级别，彩色输出
+logger.info("Hello, XQCLog!")
+logger.success("操作成功 ✅")
+logger.warning("这是一个警告 ⚠️")
+logger.error("发生错误 ❌")
 ```
-
 
 ---
 
-### v0.0.2 (2025-11-21)
+### v0.0.2
 
 **🐛 Bug 修复**
 - **修复日志调用者名称显示问题**
@@ -1591,7 +1590,7 @@ logger = init_logger(
 
 ---
 
-### v0.0.1 (2025-11-18)
+### v0.0.1
 
 🎉 **首次发布**
 
