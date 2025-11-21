@@ -9,7 +9,7 @@ import hmac
 import hashlib
 import base64
 import time
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import quote_plus
 
 from .base import BaseNotifier, AlertMessage

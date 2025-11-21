@@ -75,7 +75,7 @@ class LogConfig:
 
     def __init__(
             self,
-            log_level: str = "INFO",
+            log_level: str = "DEBUG",
             log_dir: str = "logs",
             log_file: str = "app.log",
             rotation: str = "100 MB",
@@ -89,7 +89,7 @@ class LogConfig:
             format_string: Optional[str] = None,
             logging_format: Optional[str] = None,  # 新增：支持 logging 格式
             console_output: bool = True,
-            file_output: bool = True,
+            file_output: bool = False,
             auto_split: bool = False,
             # 告警配置（新版）
             notifiers: Optional[List[Dict[str, Any]]] = None,

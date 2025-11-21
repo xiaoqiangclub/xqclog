@@ -9,7 +9,12 @@ from .config import LogConfig
 from .presets import Presets
 from . import decorators
 
-__version__ = "0.0.2"
+from .alerts.email import EmailNotifier
+from .alerts.dingtalk import DingTalkNotifier
+from .alerts.weixin_app import WeixinAppNotifier
+from .alerts.weixin_webhook import WeixinWebhookNotifier
+
+__version__ = "0.0.3"
 __author__ = "Xiaoqiang"
 __description__ = "⚡ 基于 Loguru 的自用 Python 日志模块 - 开箱即用"
 
@@ -21,7 +26,18 @@ __all__ = [
     "Presets",
     "decorators",
     "logger",
+
+    # 告警通知类
+    "EmailNotifier",
+    "DingTalkNotifier",
+    "WeixinAppNotifier",
+    "WeixinWebhookNotifier",
 ]
 
-# 提供默认的logger实例，可以直接使用
-logger = get_logger()
+# 静默初始化 - 开箱即用（使用 LogConfig 的默认配置）
+# 配置说明：
+# - 只输出到控制台（不创建目录和文件）
+# - DEBUG 级别（显示所有日志）
+# - 启用彩色输出
+# - 不输出初始化提示信息（静默初始化）
+logger = init_logger(silent=True)

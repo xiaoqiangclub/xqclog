@@ -156,10 +156,7 @@ poetry install
 ```python
 from xqclog import logger, init_logger
 
-# 初始化（使用默认配置）
-init_logger()
-
-# 开始使用
+# 默认 DEBUG 级别，彩色输出
 logger.info("Hello, XQCLog!")
 logger.success("操作成功 ✅")
 logger.warning("这是一个警告 ⚠️")
@@ -1551,6 +1548,24 @@ init_logger(
 ---
 
 ## 📝 更新日志
+
+## 🆕 最新更新 v0.0.3
+
+**✨ 开箱即用**
+- 🚀 现在无需手动初始化，直接导入即可使用！
+```python
+from xqclog import logger
+
+logger.debug("调试信息")
+logger.info("普通信息")
+logger.warning("警告信息")
+logger.error("错误信息")
+# 就这么简单！无需配置，默认 DEBUG 级别，彩色输出
+```
+
+
+---
+
 ### v0.0.2 (2025-11-21)
 
 **🐛 Bug 修复**

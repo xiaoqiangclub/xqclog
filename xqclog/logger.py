@@ -46,6 +46,7 @@ class XQCLogger:
             config: Optional[LogConfig] = None,
             preset: Optional[str] = None,
             config_file: Optional[Union[str, Path]] = None,
+            silent: bool = False,
             **kwargs: Any
     ) -> 'XQCLogger':
         """
@@ -54,6 +55,7 @@ class XQCLogger:
         :param config: 日志配置对象，如果为None则使用默认配置
         :param preset: 预设配置名称（auto/development/testing/production/web/crawler/data）
         :param config_file: 配置文件路径（支持 .yaml, .yml, .json）
+        :param silent: 是否静默初始化，不输出初始化日志（默认 False）
         :param kwargs: 直接传入的配置参数，会覆盖config中的对应参数
                       支持 logging_format 参数以兼容标准库 logging
         :return: 返回self以支持链式调用
@@ -68,6 +70,9 @@ class XQCLogger:
             logger = init_logger(
                 logging_format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
             )
+
+            # 静默初始化
+            logger = init_logger(silent=True)
         """
         # 优先级：kwargs > config > config_file > preset > 默认配置
 
@@ -139,15 +144,17 @@ class XQCLogger:
         if config.notifiers:
             self._setup_alert_manager(config)
 
-        self.logger.info(f"日志系统初始化成功，日志级别: {config.log_level}")
-        if config.file_output:
-            if config.auto_split:
-                self.logger.info(f"日志目录: {config.log_dir}（已启用自动分割）")
-            else:
-                self.logger.info(f"日志文件路径: {config.log_path.absolute()}")
+        # 只在非静默模式下输出初始化日志
+        if not silent:
+            self.logger.info(f"✅ 日志系统初始化成功，日志级别: {config.log_level}")
+            if config.file_output:
+                if config.auto_split:
+                    self.logger.info(f"📁 日志目录: {config.log_dir}（已启用自动分割）")
+                else:
+                    self.logger.info(f"📄 日志文件路径: {config.log_path.absolute()}")
 
-        if config.notifiers:
-            self.logger.info(f"已配置 {len(config.notifiers)} 个告警通知器，策略: {config.alert_strategy}")
+            if config.notifiers:
+                self.logger.info(f"🔔 已配置 {len(config.notifiers)} 个告警通知器，策略: {config.alert_strategy}")
 
         return self
 
@@ -211,7 +218,7 @@ class XQCLogger:
 
             notifier_type = notifier_cfg.pop("type", None)
             if not notifier_type:
-                self.logger.warning("通知器配置缺少type字段，跳过")
+                self.logger.warning("⚠️ 通知器配置缺少type字段，跳过")
                 continue
 
             priority = notifier_cfg.pop("priority", 0)
@@ -223,9 +230,9 @@ class XQCLogger:
                     **notifier_cfg
                 )
                 notifiers_added += 1
-                self.logger.debug(f"已添加通知器: {notifier_type} (优先级: {priority})")
+                self.logger.debug(f"✅ 已添加通知器: {notifier_type} (优先级: {priority})")
             except Exception as e:
-                self.logger.error(f"添加通知器失败 ({notifier_type}): {e}")
+                self.logger.error(f"❌ 添加通知器失败 ({notifier_type}): {e}")
 
         # 添加告警sink
         if notifiers_added > 0:
@@ -256,7 +263,7 @@ class XQCLogger:
                 )
             except Exception as e:
                 # 发送告警失败不应该影响日志记录
-                print(f"发送告警失败: {e}")
+                print(f"❌ 发送告警失败: {e}")
 
         self.logger.add(
             alert_sink,
@@ -393,9 +400,9 @@ class XQCLogger:
             self.config.log_level = level.upper()
             # 重新初始化以应用新的级别
             self.init(self.config)
-            self.logger.info(f"日志级别已从 {old_level} 更改为 {level.upper()}")
+            self.logger.info(f"🔄 日志级别已从 {old_level} 更改为 {level.upper()}")
         else:
-            self.logger.warning("未初始化配置，无法设置日志级别")
+            self.logger.warning("⚠️ 未初始化配置，无法设置日志级别")
 
     @contextmanager
     def timer(self, name: str = "操作", level: str = "INFO"):
@@ -592,7 +599,7 @@ class XQCLogger:
         :return: 处理器ID
         """
         handler_id = self.logger.add(sink, **kwargs)
-        self.logger.info(f"已添加新的日志处理器: {sink}")
+        self.logger.info(f"➕ 已添加新的日志处理器: {sink}")
         return handler_id
 
     def remove_handler(self, handler_id: int) -> None:
@@ -602,7 +609,7 @@ class XQCLogger:
         :param handler_id: 处理器ID
         """
         self.logger.remove(handler_id)
-        self.logger.info(f"已移除日志处理器: {handler_id}")
+        self.logger.info(f"➖ 已移除日志处理器: {handler_id}")
 
     def bind(self, **kwargs: Any):
         """
@@ -679,13 +686,13 @@ class XQCLogger:
                 priority=priority,
                 **config
             )
-            self.logger.info(f"已动态添加通知器: {notifier_type} (优先级: {priority})")
+            self.logger.info(f"✅ 已动态添加通知器: {notifier_type} (优先级: {priority})")
 
             # 如果是第一个通知器，需要添加alert handler
             if self._alert_manager.get_notifiers_count() == 1:
                 self._add_alert_handler()
         except Exception as e:
-            self.logger.error(f"添加通知器失败 ({notifier_type}): {e}")
+            self.logger.error(f"❌ 添加通知器失败 ({notifier_type}): {e}")
 
     def register_custom_notifier(
             self,
@@ -703,7 +710,7 @@ class XQCLogger:
             self._alert_manager = get_alert_manager()
 
         self._alert_manager.register_custom_notifier(name, notifier_class)
-        self.logger.info(f"已注册自定义通知器: {name}")
+        self.logger.info(f"📝 已注册自定义通知器: {name}")
 
     def get_config(self) -> Optional[LogConfig]:
         """
@@ -720,7 +727,7 @@ class XQCLogger:
         :param config_file: 配置文件路径（支持 .yaml, .json）
         """
         if self.config is None:
-            self.logger.warning("没有可保存的配置")
+            self.logger.warning("⚠️ 没有可保存的配置")
             return
 
         import yaml
@@ -737,7 +744,7 @@ class XQCLogger:
             else:
                 raise ValueError(f"不支持的配置文件格式: {config_path.suffix}")
 
-        self.logger.info(f"配置已保存到: {config_path.absolute()}")
+        self.logger.info(f"💾 配置已保存到: {config_path.absolute()}")
 
 
 # 创建全局日志实例
@@ -769,6 +776,7 @@ def init_logger(
                   - format_string: loguru 格式字符串（推荐）
                   - logging_format: logging 格式字符串（兼容标准库）
                   - log_level: 日志级别
+                  - silent: 是否静默初始化（不输出初始化日志）
                   - 其他 LogConfig 支持的参数
     :return: XQCLogger实例
 
@@ -782,5 +790,8 @@ def init_logger(
         logger = init_logger(
             logging_format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         )
+
+        # 静默初始化
+        logger = init_logger(silent=True)
     """
     return _global_logger.init(config=config, preset=preset, config_file=config_file, **kwargs)
